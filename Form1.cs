@@ -39,7 +39,7 @@ namespace TagGenerator
         private void Form1_Load(object sender, EventArgs e)
         {
             //uncomment to re-create the xml file used as template.
-            initTemplate();
+            //initTemplate();
             LoadTemplate();
 
             cxfFont = parse(FontFile);
@@ -169,6 +169,7 @@ namespace TagGenerator
                     //new command
                     if (new_cmd.IsMatch(s))
                     {
+
                         key = new_cmd.Match(s).Groups[1].Value;
                         num_cmds = Convert.ToInt16(new_cmd.Match(s).Groups[2].Value);
                         cmds_read = 0;
@@ -340,53 +341,6 @@ namespace TagGenerator
 
         public StringBuilder Gcode = new StringBuilder();
 
-        public void CalculateTTFStrokes(Control.ControlCollection controls)
-        {
-            int numTag = 0;
-            Tags.Clear();
-            PointF oldPoint = new PointF(-999990.0F, -999990.0F);
-            // float font_word_space = cxfFont.Aggregate((l, r) => l.Value.get_xmax() > r.Value.get_xmax() ? l : r).Value.get_xmax();            
-            // float font_char_space = font_word_space * (Properties.Settings.Default.CharSpacing / 100);
-
-            foreach (TextBox item in controls.OfType<TextBox>())
-            {
-                NamePlate plate = new NamePlate();
-                plate.numTag = numTag;
-                RectangleF TagLoc = (RectangleF)item.Tag;
-
-                float YScale = (TagLoc.Height - (Properties.Settings.Default.EngraverDiameter / 2));
-                float char_space = (float)(0.75 * YScale);
-                float word_space = ((float)(Properties.Settings.Default.CharSpacing) / 100) * char_space;
-
-                float XScale = char_space; //(TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2));
-
-                //LeftJustified
-                //float xoffset = TagLoc.X + (Properties.Settings.Default.EngraverDiameter / 2);
-                //Centered
-                float margin = (TagLoc.Width - (((float)item.TextLength - 1) * char_space) - Properties.Settings.Default.EngraverDiameter) / 2;
-                float xoffset = TagLoc.X + margin;
-
-                //justified along the bottom...
-                //float yoffset = TagLoc.Y + (Properties.Settings.Default.EngraverDiameter / 2);
-                //Centered?
-                float yoffset = TagLoc.Y + ((TagLoc.Height - YScale) / 2);
-
-                //PointF[] points = new PointF[0];
-                GraphicsPath gpath = new GraphicsPath();
-                PrivateFontCollection collection = new PrivateFontCollection();
-                collection.AddFontFile(@"C:\Users\Rick\Documents\Visual Studio 2015\Projects\TagGenerator\cxf-fonts\stick1.ttf");
-                //FontFamily fontFamily = new FontFamily("stick1", collection);
-                //Font stickFont = new Font(fontFamily, YScale);               
-
-                gpath.AddString(item.Text, collection.Families.First(), 0, YScale, new PointF(xoffset, xoffset), StringFormat.GenericDefault);
-
-                plate.path= gpath;
-                Tags.Add(plate);
-                numTag++;
-
-            }
-        }
-
         public void CalculateStrokes(Control.ControlCollection controls)
         {
             int numTag = 0;
@@ -401,36 +355,44 @@ namespace TagGenerator
                 plate.numTag = numTag;
                 RectangleF TagLoc = (RectangleF)item.Tag;
 
-                float YScale = (TagLoc.Height - (Properties.Settings.Default.EngraverDiameter / 2));
+                float YScale = (TagLoc.Height - (Properties.Settings.Default.EngraverDiameter));
                 float char_space = (float)(1 * YScale);
                 float word_space = ((float)(Properties.Settings.Default.CharSpacing) / 100) * char_space;
 
+                float textWidth = word_space * item.TextLength;
+                if(textWidth > (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2)))
+                {
+                    char_space = (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2)) / item.TextLength;
+                    word_space = ((float)(Properties.Settings.Default.CharSpacing) / 100) * char_space;
+                    YScale = char_space; // 1/aspect_ratio 
+                }               
                 float XScale = char_space; //(TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2));
 
                 //LeftJustified
                 //float xoffset = TagLoc.X + (Properties.Settings.Default.EngraverDiameter / 2);
                 //Centered
-                float margin = (TagLoc.Width - (((float)item.TextLength - 1) * char_space) - Properties.Settings.Default.EngraverDiameter) / 2;
+                float margin = (TagLoc.Width + Properties.Settings.Default.EngraverDiameter);
+                margin = Math.Abs(margin - (word_space * item.TextLength));
+                margin /= 2;
                 float xoffset = TagLoc.X + margin;
 
                 //justified along the bottom...
                 //float yoffset = TagLoc.Y + (Properties.Settings.Default.EngraverDiameter / 2);
                 //Centered?
-                float yoffset = TagLoc.Y + ((TagLoc.Height - YScale) / 2);
+                float yoffset = TagLoc.Y;
+                yoffset += ((TagLoc.Height - YScale) / 2);
 
                 PointF[] points = new PointF[0];
 
                 foreach (char letter in item.Text.ToCharArray())
-                {
-
+                {       
                     if (letter == ' ')
                     {
                         xoffset += XScale * word_space;
                         continue;
                     }
-                    try
-                    {
                         bool first_stroke = true;
+                        bool onlyTwo = true;
                         foreach (var stroke in cxfFont[letter].stroke_list)
                         {
                             float dx = oldPoint.X - XScale * stroke.xstart;
@@ -442,15 +404,14 @@ namespace TagGenerator
                                 Array.Resize(ref points, points.Length + 1);
                                 points[points.Length - 1].X = XScale * stroke.xend + xoffset;
                                 points[points.Length - 1].Y = YScale * stroke.yend + yoffset;
+                                onlyTwo = false;
                             }
                             else
                             {
-                                if (!first_stroke && points.Length >= 2)
+                                if (!first_stroke && points.Length > 1)
                                 {
-                                    //Tags.Segments.Add(points);
-                                    plate.Segments.Add(points);
+                                    plate.Segments.Add(points);                                
                                 }
-
                                 points = new PointF[2];
                                 points[0].X = (XScale * stroke.xstart) + xoffset;
                                 points[0].Y = (YScale * stroke.ystart) + yoffset;
@@ -458,131 +419,29 @@ namespace TagGenerator
                                 points[1].Y = (YScale * stroke.yend) + yoffset;
 
                             }
-                            oldPoint.X = XScale * (stroke.xend);// + xoffset;
-                            oldPoint.Y = YScale * stroke.yend;// + yoffset;
+                            oldPoint.X = points.Last().X;
+                            oldPoint.Y = points.Last().Y;
                             first_stroke = false;
                         }
-                        plate.Segments.Add(points);
-                        Tags.Add(plate);
-                        numTag++;
-                        // # move over for next character
-                        //float char_width = XScale * (cxfFont[letter].get_xmax());
-                        //Largest width space
-                        xoffset += word_space;// + char_width;
-                                              //xoffset += XScale*(cxfFont[letter].get_xmax());
-                    }
-                    catch (Exception)
-                    {
-                        throw;
-                    }
-                }
-            }
-        }
 
-        public void CalculateGcode(Control.ControlCollection controls)
-        {
-            Gcode.Clear();
-
-            float ClearanceZ = Properties.Settings.Default.ClearanceHeight;
-            float RetractZ = Properties.Settings.Default.RetractHeight;
-            float Depth = -Properties.Settings.Default.EngravingDepth;
-
-            float PlungeFeed = Properties.Settings.Default.PlungeFeedRate;
-            float CuttingFeed = Properties.Settings.Default.CuttingFeedRate;
-
-            float oldx = -999990.0F;
-            float oldy = oldx;
-
-            Gcode.AppendFormat(" Font File: {0}", System.IO.Path.GetFileName(FontFile)).AppendLine();
-            Gcode.Append("G90 ");    //Absolute programming of XYZ
-            Gcode.Append("G94 ");    //Units per minute feed mode.
-            Gcode.Append("G17 ");    //Select X-Y plane
-            Gcode.AppendLine();
-            Gcode.AppendLine("G20 ");    //Program coordinates are inches
-
-            //set spindle speed and rotate Clockwise.
-            Gcode.AppendFormat("S{0} M03", Properties.Settings.Default.SpindleSpeed).AppendLine();
-            //Move to the safe Z height.
-            //Gcode.AppendFormat("G0 Z{0:0.0###}", ClearanceZ).AppendLine();  
-
-            //Dictionary<char, Character> Font = parse(FontFile);
-
-            float font_line_height = cxfFont.Aggregate((l, r) => l.Value.get_ymax() > r.Value.get_ymax() ? l : r).Value.get_ymax();
-
-            Gcode.AppendFormat("Max Font Height: {0}", font_line_height).AppendLine();
-
-            float font_word_space = cxfFont.Aggregate((l, r) => l.Value.get_xmax() > r.Value.get_xmax() ? l : r).Value.get_xmax();
-
-            float font_char_space = font_word_space * (Properties.Settings.Default.CharSpacing / 100);
-
-            float xoffset = 0;
-
-            Gcode.AppendFormat("G0 Z{0:0.0###}", ClearanceZ).AppendLine();
-
-            foreach (TextBox item in controls.OfType<TextBox>())
-            {
-                foreach (char letter in item.Text.ToCharArray())
-                {
-                    if (letter == ' ')
-                    {
-                        xoffset += font_word_space;
-                        continue;
-                    }
-                    try
-                    {
-                        Gcode.AppendFormat("(character {0} )", letter).AppendLine();
-                        bool first_stroke = true;
-                        foreach (var stroke in cxfFont[letter].stroke_list)
+                        if (onlyTwo)
                         {
-                            float dx = oldx - stroke.xstart;
-                            float dy = oldy - stroke.ystart;
-                            float dist = (float)Math.Sqrt(dx * dx + dy * dy);
-                            float x1 = stroke.xstart + xoffset;
-                            float y1 = stroke.ystart;
-                            float x2 = stroke.xend + xoffset;
-                            float y2 = stroke.yend;
-
-                            //# check and see if we need to move to a new discontinuous start point
-                            if ((dist > 0.0001) || first_stroke)
-                            {
-                                if (!first_stroke)
-                                {
-                                    Gcode.AppendFormat("G1 Z{0:0.0###} F{1:0.#}", RetractZ, PlungeFeed).AppendLine();
-                                }
-                                //G0 Rapid move to the point
-                                Gcode.AppendFormat("G0 X{0:0.0###} Y{1:0.0###}", x1, y1).AppendLine();
-                                //Gcode.AppendFormat("G0 Z{0:0.0###}", RetractZ).AppendLine();  //Rapid move to the Retract Height.
-                                if (first_stroke)
-                                {
-                                    //rapid to retract position
-                                    Gcode.AppendFormat("G0 Z{0:0.0###}", RetractZ).AppendLine();
-                                }
-                                Gcode.AppendFormat("G1 Z{0:0.0###} F{1:0.#}", Depth, PlungeFeed).AppendLine();  // move to the Depth
-                                first_stroke = false;
-                            }
-                            //
-                            Gcode.AppendFormat("G1 X{0:0.0###} Y{1:0.0###} F{2:0.#}", x2, y2, CuttingFeed).AppendLine();
-                            //
-                            oldx = stroke.xend;
-                            oldy = stroke.yend;
-                        }
-                        // # move over for next character
-                        float char_width = cxfFont[letter].get_xmax();
-                        xoffset += font_char_space + char_width;
-                    }
-                    catch (Exception)
+                            plate.Segments.Add(points);
+                        }                  
+                        if(letter == '.')
                     {
-
-                        throw;
+                        xoffset += word_space / 2;
                     }
-                    Gcode.AppendFormat("G1 Z{0:0.0###} F{1:0.#}", RetractZ, PlungeFeed).AppendLine();
-                    Gcode.AppendLine();
+                    else
+                    {
+                        xoffset += word_space;// + char_width;
+                    }                           
                 }
 
-                Gcode.AppendFormat("G0 Z{0:0.0###}", ClearanceZ).AppendLine();  //Rapid move to the Retract Height.
-                Gcode.AppendLine("M30");
+                Tags.Add(plate);
+                numTag++;
             }
-        }
+        }              
         #endregion
 
         public void CreateGcode()
@@ -608,7 +467,7 @@ namespace TagGenerator
 
             //set spindle speed and rotate Clockwise.
             Gcode.AppendFormat("S{0} M03", Properties.Settings.Default.SpindleSpeed).AppendLine();
-            //Gcode.AppendFormat("G0 Z{0:0.0###}", ClearanceZ).AppendLine();
+
             IssueGCommand("a", 0, 0, 0, 0);
             Gcode.AppendLine(IssueGCommand("G00", 0,0, ClearanceZ, 0));
             foreach (var tag in Tags)
@@ -643,12 +502,16 @@ namespace TagGenerator
                     }
                     Gcode.AppendLine(IssueGCommand("G00", Xold, Yold, RetractZ, 0));
                 }
-                Gcode.AppendLine(IssueGCommand("G00", Xold, Yold, ClearanceZ, 0));
+                var lift = IssueGCommand("G00", Xold, Yold, ClearanceZ, 0);
+                if(lift != string.Empty)
+                {
+                    Gcode.AppendLine(lift);
+                }               
             }
-           // Gcode.AppendFormat("G00 Z{0:0.0###}", ClearanceZ).AppendLine();  //Rapid move to the Retract Height.
             Gcode.AppendLine("M30");
             Gcode.AppendLine("%");
         }
+
         public String Gold = string.Empty;
         public float Xold = 0;
         public float Yold = 0;
@@ -709,6 +572,7 @@ namespace TagGenerator
 
         private void btn_Generate_Click(object sender, EventArgs e)
         {
+            rtxt_Out.Clear();
             CalculateStrokes(tabPageEdit.Controls);
             pictureBox1.Invalidate();
             CreateGcode();
@@ -816,6 +680,113 @@ namespace TagGenerator
             Properties.Settings.Default.Save();
         }
 
+
+        #region "Garbage"
+
+        public void CalculateGcode(Control.ControlCollection controls)
+        {
+            Gcode.Clear();
+
+            float ClearanceZ = Properties.Settings.Default.ClearanceHeight;
+            float RetractZ = Properties.Settings.Default.RetractHeight;
+            float Depth = -Properties.Settings.Default.EngravingDepth;
+
+            float PlungeFeed = Properties.Settings.Default.PlungeFeedRate;
+            float CuttingFeed = Properties.Settings.Default.CuttingFeedRate;
+
+            float oldx = -999990.0F;
+            float oldy = oldx;
+
+            Gcode.AppendFormat(" Font File: {0}", System.IO.Path.GetFileName(FontFile)).AppendLine();
+            Gcode.Append("G90 ");    //Absolute programming of XYZ
+            Gcode.Append("G94 ");    //Units per minute feed mode.
+            Gcode.Append("G17 ");    //Select X-Y plane
+            Gcode.AppendLine();
+            Gcode.AppendLine("G20 ");    //Program coordinates are inches
+
+            //set spindle speed and rotate Clockwise.
+            Gcode.AppendFormat("S{0} M03", Properties.Settings.Default.SpindleSpeed).AppendLine();
+            //Move to the safe Z height.
+            //Gcode.AppendFormat("G0 Z{0:0.0###}", ClearanceZ).AppendLine();  
+
+            //Dictionary<char, Character> Font = parse(FontFile);
+
+            float font_line_height = cxfFont.Aggregate((l, r) => l.Value.get_ymax() > r.Value.get_ymax() ? l : r).Value.get_ymax();
+
+            Gcode.AppendFormat("Max Font Height: {0}", font_line_height).AppendLine();
+
+            float font_word_space = cxfFont.Aggregate((l, r) => l.Value.get_xmax() > r.Value.get_xmax() ? l : r).Value.get_xmax();
+
+            float font_char_space = font_word_space * (Properties.Settings.Default.CharSpacing / 100);
+
+            float xoffset = 0;
+
+            Gcode.AppendFormat("G0 Z{0:0.0###}", ClearanceZ).AppendLine();
+
+            foreach (TextBox item in controls.OfType<TextBox>())
+            {
+                foreach (char letter in item.Text.ToCharArray())
+                {
+                    if (letter == ' ')
+                    {
+                        xoffset += font_word_space;
+                        continue;
+                    }
+                    try
+                    {
+                        Gcode.AppendFormat("(character {0} )", letter).AppendLine();
+                        bool first_stroke = true;
+                        foreach (var stroke in cxfFont[letter].stroke_list)
+                        {
+                            float dx = oldx - stroke.xstart;
+                            float dy = oldy - stroke.ystart;
+                            float dist = (float)Math.Sqrt(dx * dx + dy * dy);
+                            float x1 = stroke.xstart + xoffset;
+                            float y1 = stroke.ystart;
+                            float x2 = stroke.xend + xoffset;
+                            float y2 = stroke.yend;
+
+                            //# check and see if we need to move to a new discontinuous start point
+                            if ((dist > 0.0001) || first_stroke)
+                            {
+                                if (!first_stroke)
+                                {
+                                    Gcode.AppendFormat("G1 Z{0:0.0###} F{1:0.#}", RetractZ, PlungeFeed).AppendLine();
+                                }
+                                //G0 Rapid move to the point
+                                Gcode.AppendFormat("G0 X{0:0.0###} Y{1:0.0###}", x1, y1).AppendLine();
+                                //Gcode.AppendFormat("G0 Z{0:0.0###}", RetractZ).AppendLine();  //Rapid move to the Retract Height.
+                                if (first_stroke)
+                                {
+                                    //rapid to retract position
+                                    Gcode.AppendFormat("G0 Z{0:0.0###}", RetractZ).AppendLine();
+                                }
+                                Gcode.AppendFormat("G1 Z{0:0.0###} F{1:0.#}", Depth, PlungeFeed).AppendLine();  // move to the Depth
+                                first_stroke = false;
+                            }
+                            //
+                            Gcode.AppendFormat("G1 X{0:0.0###} Y{1:0.0###} F{2:0.#}", x2, y2, CuttingFeed).AppendLine();
+                            //
+                            oldx = stroke.xend;
+                            oldy = stroke.yend;
+                        }
+                        // # move over for next character
+                        float char_width = cxfFont[letter].get_xmax();
+                        xoffset += font_char_space + char_width;
+                    }
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
+                    Gcode.AppendFormat("G1 Z{0:0.0###} F{1:0.#}", RetractZ, PlungeFeed).AppendLine();
+                    Gcode.AppendLine();
+                }
+
+                Gcode.AppendFormat("G0 Z{0:0.0###}", ClearanceZ).AppendLine();  //Rapid move to the Retract Height.
+                Gcode.AppendLine("M30");
+            }
+        }
         //public Dictionary<char, Character> parse(string font_path)
         //{
         //    Dictionary<char, Character> font = new Dictionary<char, Character>();
@@ -926,5 +897,53 @@ namespace TagGenerator
         //    }
         //    return font;
         //}
+
+        public void CalculateTTFStrokes(Control.ControlCollection controls)
+        {
+            int numTag = 0;
+            Tags.Clear();
+            PointF oldPoint = new PointF(-999990.0F, -999990.0F);
+            // float font_word_space = cxfFont.Aggregate((l, r) => l.Value.get_xmax() > r.Value.get_xmax() ? l : r).Value.get_xmax();            
+            // float font_char_space = font_word_space * (Properties.Settings.Default.CharSpacing / 100);
+
+            foreach (TextBox item in controls.OfType<TextBox>())
+            {
+                NamePlate plate = new NamePlate();
+                plate.numTag = numTag;
+                RectangleF TagLoc = (RectangleF)item.Tag;
+
+                float YScale = (TagLoc.Height - (Properties.Settings.Default.EngraverDiameter / 2));
+                float char_space = (float)(0.75 * YScale);
+                float word_space = ((float)(Properties.Settings.Default.CharSpacing) / 100) * char_space;
+
+                float XScale = char_space; //(TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2));
+
+                //LeftJustified
+                //float xoffset = TagLoc.X + (Properties.Settings.Default.EngraverDiameter / 2);
+                //Centered
+                float margin = (TagLoc.Width - (((float)item.TextLength - 1) * char_space) - Properties.Settings.Default.EngraverDiameter) / 2;
+                float xoffset = TagLoc.X + margin;
+
+                //justified along the bottom...
+                //float yoffset = TagLoc.Y + (Properties.Settings.Default.EngraverDiameter / 2);
+                //Centered?
+                float yoffset = TagLoc.Y + ((TagLoc.Height - YScale) / 2);
+
+                //PointF[] points = new PointF[0];
+                GraphicsPath gpath = new GraphicsPath();
+                PrivateFontCollection collection = new PrivateFontCollection();
+                collection.AddFontFile(@"C:\Users\Rick\Documents\Visual Studio 2015\Projects\TagGenerator\cxf-fonts\stick1.ttf");
+                //FontFamily fontFamily = new FontFamily("stick1", collection);
+                //Font stickFont = new Font(fontFamily, YScale);               
+
+                gpath.AddString(item.Text, collection.Families.First(), 0, YScale, new PointF(xoffset, xoffset), StringFormat.GenericDefault);
+
+                plate.path = gpath;
+                Tags.Add(plate);
+                numTag++;
+
+            }
+        }
+        #endregion
     }
 }
