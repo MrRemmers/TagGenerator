@@ -1,0 +1,27 @@
+# Format:            QCad II Font
+# Creator:           QCad
+# Version:           1
+# Name:              Standard
+# Name:              Normal
+# Encoding:          ISO8859-1
+# LetterSpacing:     3.0
+# WordSpacing:       6.75
+# LineSpacingFactor: 1.0
+# Author:            Andrew Mustun <andrew@qcad.org>
+
+[A] 3
+L 0,0,3,9
+L 3,9,6,0
+L 0.833313,2.5,5.166687,2.5
+
+[B] 8
+L 0,0,0,9
+L 0,9,2.5,9
+A 2.5,7,2,270,90
+L 0,5,2.599976,5
+A 2.599976,2.6,2.4,0,90
+L 5,2.6,5,2.4
+A 2.599976,2.4,2.4,270,0
+L 2.599976,0,0,0
+
+#EOF
