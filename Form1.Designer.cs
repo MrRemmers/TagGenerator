@@ -33,9 +33,9 @@
             this.btn_Generate = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPageEdit = new System.Windows.Forms.TabPage();
-            this.tabPageGcode = new System.Windows.Forms.TabPage();
             this.tabPagePreview = new System.Windows.Forms.TabPage();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.tabPageGcode = new System.Windows.Forms.TabPage();
             this.txt_CharSpacing = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -58,9 +58,9 @@
             this.label14 = new System.Windows.Forms.Label();
             this.txt_CutRate = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
-            this.tabPageGcode.SuspendLayout();
             this.tabPagePreview.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.tabPageGcode.SuspendLayout();
             this.SuspendLayout();
             // 
             // rtxt_Out
@@ -74,7 +74,8 @@
             // 
             // btn_Generate
             // 
-            this.btn_Generate.Location = new System.Drawing.Point(12, 521);
+            this.btn_Generate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_Generate.Location = new System.Drawing.Point(12, 529);
             this.btn_Generate.Name = "btn_Generate";
             this.btn_Generate.Size = new System.Drawing.Size(108, 52);
             this.btn_Generate.TabIndex = 3;
@@ -103,17 +104,6 @@
             this.tabPageEdit.Text = "Edit";
             this.tabPageEdit.UseVisualStyleBackColor = true;
             // 
-            // tabPageGcode
-            // 
-            this.tabPageGcode.Controls.Add(this.rtxt_Out);
-            this.tabPageGcode.Location = new System.Drawing.Point(4, 22);
-            this.tabPageGcode.Name = "tabPageGcode";
-            this.tabPageGcode.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageGcode.Size = new System.Drawing.Size(721, 559);
-            this.tabPageGcode.TabIndex = 1;
-            this.tabPageGcode.Text = "GCode";
-            this.tabPageGcode.UseVisualStyleBackColor = true;
-            // 
             // tabPagePreview
             // 
             this.tabPagePreview.Controls.Add(this.pictureBox1);
@@ -134,6 +124,17 @@
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
+            // 
+            // tabPageGcode
+            // 
+            this.tabPageGcode.Controls.Add(this.rtxt_Out);
+            this.tabPageGcode.Location = new System.Drawing.Point(4, 22);
+            this.tabPageGcode.Name = "tabPageGcode";
+            this.tabPageGcode.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageGcode.Size = new System.Drawing.Size(721, 559);
+            this.tabPageGcode.TabIndex = 1;
+            this.tabPageGcode.Text = "GCode";
+            this.tabPageGcode.UseVisualStyleBackColor = true;
             // 
             // txt_CharSpacing
             // 
@@ -351,9 +352,9 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tabControl1.ResumeLayout(false);
-            this.tabPageGcode.ResumeLayout(false);
             this.tabPagePreview.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.tabPageGcode.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 

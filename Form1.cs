@@ -346,6 +346,7 @@ namespace TagGenerator
             int numTag = 0;
             Tags.Clear();
             PointF oldPoint = new PointF(-999990.0F, -999990.0F);
+            float tracking = ((float)(Properties.Settings.Default.CharSpacing) / 100);
             // float font_word_space = cxfFont.Aggregate((l, r) => l.Value.get_xmax() > r.Value.get_xmax() ? l : r).Value.get_xmax();            
             // float font_char_space = font_word_space * (Properties.Settings.Default.CharSpacing / 100);
 
@@ -355,24 +356,41 @@ namespace TagGenerator
                 plate.numTag = numTag;
                 RectangleF TagLoc = (RectangleF)item.Tag;
 
-                float YScale = (TagLoc.Height - (Properties.Settings.Default.EngraverDiameter));
-                float char_space = (float)(1 * YScale);
-                float word_space = ((float)(Properties.Settings.Default.CharSpacing) / 100) * char_space;
+                //Scale starts out with text as large as possible
+                float Scale = (TagLoc.Height - (Properties.Settings.Default.EngraverDiameter));
+                //the X distance that the characters take
+                float char_space = 0;
+                //the width of the entire text box.
+                float textWidth =0;
 
-                float textWidth = word_space * item.TextLength;
-                if(textWidth > (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2)))
+                foreach (char letter in item.Text.ToCharArray())
                 {
-                    char_space = (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2)) / item.TextLength;
-                    word_space = ((float)(Properties.Settings.Default.CharSpacing) / 100) * char_space;
-                    YScale = char_space; // 1/aspect_ratio 
-                }               
-                float XScale = char_space; //(TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2));
+                    if (letter != ' ')
+                    {
+                        if (cxfFont[letter].get_xmax() == 0)
+                        {
+                            char_space += 0.25F;
+                        }
+                        char_space += cxfFont[letter].get_xmax();
+                    }
+                    else
+                    {
+                        char_space += 0.5F;
+                    }                   
+                }
+
+                textWidth = tracking * Scale * char_space;
+
+                if (textWidth > (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2)))
+                {
+                    Scale = (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2)) / (tracking * char_space);
+                    textWidth = tracking * Scale * char_space;
+                }
 
                 //LeftJustified
                 //float xoffset = TagLoc.X + (Properties.Settings.Default.EngraverDiameter / 2);
                 //Centered
-                float margin = (TagLoc.Width + Properties.Settings.Default.EngraverDiameter);
-                margin = Math.Abs(margin - (word_space * item.TextLength));
+                float margin = (TagLoc.Width - textWidth);
                 margin /= 2;
                 float xoffset = TagLoc.X + margin;
 
@@ -380,45 +398,50 @@ namespace TagGenerator
                 //float yoffset = TagLoc.Y + (Properties.Settings.Default.EngraverDiameter / 2);
                 //Centered?
                 float yoffset = TagLoc.Y;
-                yoffset += ((TagLoc.Height - YScale) / 2);
+                yoffset += ((TagLoc.Height - Scale) / 2);
 
                 PointF[] points = new PointF[0];
 
                 foreach (char letter in item.Text.ToCharArray())
-                {       
+                {
                     if (letter == ' ')
                     {
-                        xoffset += XScale * word_space;
+                        xoffset += tracking * Scale * 0.5F;
                         continue;
                     }
-                        bool first_stroke = true;
-                        bool onlyTwo = true;
-                        foreach (var stroke in cxfFont[letter].stroke_list)
+                    float char_X = Scale * cxfFont[letter].get_xmax();
+                    if(char_X == 0)
+                    {
+                        char_X = (float)(Scale * 0.25);
+                    }
+
+                    bool first_stroke = true;
+                    bool onlyTwo = true;
+                    foreach (var stroke in cxfFont[letter].stroke_list)
+                    {
+                        float dx = oldPoint.X - Scale * stroke.xstart;
+                        float dy = oldPoint.Y - Scale * stroke.ystart;
+                        float dist = (float)Math.Sqrt(dx * dx + dy * dy);
+
+                        if ((dist < 0.001))
                         {
-                            float dx = oldPoint.X - XScale * stroke.xstart;
-                            float dy = oldPoint.Y - YScale * stroke.ystart;
-                            float dist = (float)Math.Sqrt(dx * dx + dy * dy);
-
-                            if ((dist < 0.001))
+                            Array.Resize(ref points, points.Length + 1);
+                            points[points.Length - 1].X = Scale * stroke.xend + xoffset;
+                            points[points.Length - 1].Y = Scale * stroke.yend + yoffset;
+                            onlyTwo = false;
+                        }
+                        else
+                        {
+                            if (!first_stroke && points.Length > 1)
                             {
-                                Array.Resize(ref points, points.Length + 1);
-                                points[points.Length - 1].X = XScale * stroke.xend + xoffset;
-                                points[points.Length - 1].Y = YScale * stroke.yend + yoffset;
-                                onlyTwo = false;
+                                plate.Segments.Add(points);                                
                             }
-                            else
-                            {
-                                if (!first_stroke && points.Length > 1)
-                                {
-                                    plate.Segments.Add(points);                                
-                                }
-                                points = new PointF[2];
-                                points[0].X = (XScale * stroke.xstart) + xoffset;
-                                points[0].Y = (YScale * stroke.ystart) + yoffset;
-                                points[1].X = (XScale * stroke.xend) + xoffset;
-                                points[1].Y = (YScale * stroke.yend) + yoffset;
-
-                            }
+                            points = new PointF[2];
+                            points[0].X = (Scale * stroke.xstart) + xoffset;
+                            points[0].Y = (Scale * stroke.ystart) + yoffset;
+                            points[1].X = (Scale * stroke.xend) + xoffset;
+                            points[1].Y = (Scale * stroke.yend) + yoffset;
+                        }
                             oldPoint.X = points.Last().X;
                             oldPoint.Y = points.Last().Y;
                             first_stroke = false;
@@ -428,16 +451,8 @@ namespace TagGenerator
                         {
                             plate.Segments.Add(points);
                         }                  
-                        if(letter == '.')
-                    {
-                        xoffset += word_space / 2;
-                    }
-                    else
-                    {
-                        xoffset += word_space;// + char_width;
-                    }                           
+                        xoffset += tracking * char_X;                    
                 }
-
                 Tags.Add(plate);
                 numTag++;
             }
@@ -501,6 +516,11 @@ namespace TagGenerator
                         
                     }
                     Gcode.AppendLine(IssueGCommand("G00", Xold, Yold, RetractZ, 0));
+                    //var clear = IssueGCommand("G00", Xold, Yold, RetractZ, 0);
+                    //if(clear != string.Empty)
+                    //{
+                    //    Gcode.AppendLine(clear);
+                    //}                    
                 }
                 var lift = IssueGCommand("G00", Xold, Yold, ClearanceZ, 0);
                 if(lift != string.Empty)
@@ -565,8 +585,6 @@ namespace TagGenerator
             Yold = Y;
             Zold = Z;
             Fold = F;
-
-
             return GcodeLine;
         }
 
@@ -584,7 +602,7 @@ namespace TagGenerator
             g.Graphics.Clear(Color.White);
             if (Jig != null)
             {
-                Pen thick = new Pen(Color.Black, 2);
+                Pen thick = new Pen(Color.Black, 1.5F);
                 float Xscale = pictureBox1.Width / Jig.Perimeter.Width;
                 float Yscale = pictureBox1.Height / Jig.Perimeter.Height;
 #if truetype
@@ -620,7 +638,7 @@ namespace TagGenerator
                             {
                                 sSeg[i].X = ln[i].X * Xscale;
                                 sSeg[i].Y = ln[i].Y * Yscale;
-                                //g.FillRectangle(Brushes.Black, new RectangleF(sketch[x].X, sketch[x].Y, 1, 1));
+                                g.Graphics.FillRectangle(Brushes.Blue, new RectangleF(sSeg[i].X, sSeg[i].Y, 1, 1));
                             }
                             g.Graphics.DrawLines(thick, sSeg);
                         }
