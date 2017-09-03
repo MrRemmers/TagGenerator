@@ -61,7 +61,7 @@ namespace TagGenerator.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("normal.cxf")]
+        [global::System.Configuration.DefaultSettingValueAttribute("normal")]
         public string FontFileName {
             get {
                 return ((string)(this["FontFileName"]));
