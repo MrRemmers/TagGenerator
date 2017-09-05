@@ -46,16 +46,32 @@ namespace TagGenerator
             lbl_Name.Text = Label;
             txt_Input.Text = Input;
         }
+        public new event EventHandler TextChanged;
 
-        //class MyDesigner : System.Windows.Forms.Design.con
-        //{
-        //    public override void Initialize(IComponent comp)
-        //    {
-        //        base.Initialize(comp);
-        //        var uc = (UserControl1)comp;
-        //        EnableDesignMode(uc.Employees, "Employees");
-        //    }
-        //}
+        private void txt_Input_TextChanged(object sender, EventArgs e)
+        {
+            if(this.TextChanged != null)
+            {
+                this.TextChanged(this, e);
+            }
 
+            if (this.Tag != null)
+            {
+                if(txt_Input.Text != string.Empty)
+                {
+                    var type = Properties.Settings.Default[(string)Tag].GetType();
+                    if (type == typeof(float))
+                    {
+                        Properties.Settings.Default[Tag.ToString()] = Convert.ToSingle(txt_Input.Text);
+                    }
+                    if (type == typeof(int))
+                    {
+                        //Properties.Settings.Default[(string)Tag] = Convert.ToInt16(txt_Input.Text);
+                        Properties.Settings.Default[Tag.ToString()] = Convert.ToInt32(txt_Input.Text);
+                    }
+                }
+               
+            }
+        }
     }
 }

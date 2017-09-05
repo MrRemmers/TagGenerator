@@ -46,14 +46,20 @@ namespace TagGenerator
             normalizeFont(ref cxfFont);
             //rearrangeFont(ref cxfFont);
 
-            //txt_CharSpacing.Text = Convert.ToString(Properties.Settings.Default.CharSpacing);
             in_CharSpacing.Input = Convert.ToString(Properties.Settings.Default.CharSpacing);
+            in_CharSpacing.Tag = nameof(Properties.Settings.Default.CharSpacing);
             inputBox_Diameter.Input = Convert.ToString(Properties.Settings.Default.EngraverDiameter);
+            inputBox_Diameter.Tag = nameof(Properties.Settings.Default.EngraverDiameter);
             inputBox_Clearance.Input = Convert.ToString(Properties.Settings.Default.ClearanceHeight);
+            inputBox_Clearance.Tag = nameof(Properties.Settings.Default.ClearanceHeight);
             inputBox_Retract.Input = Convert.ToString(Properties.Settings.Default.RetractHeight);
+            inputBox_Clearance.Tag = nameof(Properties.Settings.Default.RetractHeight);
             inputBox_Depth.Input = Convert.ToString(Properties.Settings.Default.EngravingDepth);
+            inputBox_Depth.Tag = nameof(Properties.Settings.Default.EngravingDepth);
             inputBox_Plunge.Input = Convert.ToString(Properties.Settings.Default.PlungeFeedRate);
+            inputBox_Plunge.Tag = nameof(Properties.Settings.Default.PlungeFeedRate);
             inputBox_CutFeed.Input = Convert.ToString(Properties.Settings.Default.CuttingFeedRate);
+            inputBox_CutFeed.Tag = nameof(Properties.Settings.Default.CuttingFeedRate);
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -471,6 +477,7 @@ namespace TagGenerator
                     if (char_X == 0)
                     {
                         char_X = (float)(Scale * 0.25);
+                        xoffset += (float)(char_X * 0.125);
                     }
 
                     bool first_stroke = true;
@@ -670,6 +677,7 @@ namespace TagGenerator
             pictureBox_Preview.Invalidate();
             CreateGcode();
             richTextBox_Gcode.Text = Gcode.ToString();
+            tabControl1.SelectedTab = tabPage_preview;
         }
 
         private void pictureBox_Preview_Paint(object sender, PaintEventArgs g)
@@ -719,14 +727,29 @@ namespace TagGenerator
             g.Dispose();
         }
 
-        private void txt_Parameter_TextChanged(object sender, KeyEventArgs e)
+        private void cmb_Font_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            if (((TextBox)sender).Text != string.Empty)
-            {
-                string ParameterName = ((TextBox)sender).Name;
-
-            }
+            comboFonts.TryGetValue((string)cmb_Font.SelectedItem, out FontFile);
+            cxfFont = parse(FontFile);
+            normalizeFont(ref cxfFont);
+            Properties.Settings.Default.FontFileName = FontFile;
         }
 
+        private void btn_Clear_Click(object sender, EventArgs e)
+        {
+            //var msgClear = new MessageBox(MessageBoxButtons.YesNo, "You Sure?");
+            DialogResult result;
+
+            result = MessageBox.Show("You sure?", "You're about to delete all text", MessageBoxButtons.YesNo);
+            if(result == DialogResult.Yes)
+            {
+                foreach (TextBox item in tabPage_input.Controls.OfType<TextBox>())
+                {
+                    item.Text = string.Empty;
+                }
+                pictureBox_Preview.Invalidate();
+                richTextBox_Gcode.Clear();
+            }
+        }
     }
 }

@@ -52,6 +52,7 @@
             this.txt_Input.Name = "txt_Input";
             this.txt_Input.Size = new System.Drawing.Size(82, 20);
             this.txt_Input.TabIndex = 1;
+            this.txt_Input.TextChanged += new System.EventHandler(this.txt_Input_TextChanged);
             // 
             // tableLayoutPanel1
             // 
