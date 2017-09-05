@@ -11,6 +11,7 @@ namespace TagGenerator
     {
         public RectangleF Perimeter;
         public RectangleF[] Tag { get; set; }
-
     }
+
+
 }

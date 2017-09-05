@@ -8,11 +8,10 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 
 namespace TagGenerator
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         #region "Variables"
         public string FontFile;// = AppDomain.CurrentDomain.BaseDirectory + @"cxf-fonts\" + Properties.Settings.Default.FontFileName;
@@ -32,14 +31,13 @@ namespace TagGenerator
 
         #endregion
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
-            //uncomment to re-create the xml file used as template.
             //initTemplate();
             LoadTemplate();
             loadFonts();
@@ -48,13 +46,19 @@ namespace TagGenerator
             normalizeFont(ref cxfFont);
             //rearrangeFont(ref cxfFont);
 
-            txt_CharSpacing.Text = Convert.ToString( Properties.Settings.Default.CharSpacing);
-            txt_Diameter.Text = Convert.ToString(Properties.Settings.Default.EngraverDiameter);
-            txt_ClearanceHeight.Text = Convert.ToString(Properties.Settings.Default.ClearanceHeight);
-            txt_Retract.Text = Convert.ToString(Properties.Settings.Default.RetractHeight);
-            txt_EngravingDepth.Text = Convert.ToString(Properties.Settings.Default.EngravingDepth);
-            txt_Plunge.Text = Convert.ToString(Properties.Settings.Default.PlungeFeedRate);
-            txt_CutRate.Text = Convert.ToString(Properties.Settings.Default.CuttingFeedRate);
+            //txt_CharSpacing.Text = Convert.ToString(Properties.Settings.Default.CharSpacing);
+            in_CharSpacing.Input = Convert.ToString(Properties.Settings.Default.CharSpacing);
+            inputBox_Diameter.Input = Convert.ToString(Properties.Settings.Default.EngraverDiameter);
+            inputBox_Clearance.Input = Convert.ToString(Properties.Settings.Default.ClearanceHeight);
+            inputBox_Retract.Input = Convert.ToString(Properties.Settings.Default.RetractHeight);
+            inputBox_Depth.Input = Convert.ToString(Properties.Settings.Default.EngravingDepth);
+            inputBox_Plunge.Input = Convert.ToString(Properties.Settings.Default.PlungeFeedRate);
+            inputBox_CutFeed.Input = Convert.ToString(Properties.Settings.Default.CuttingFeedRate);
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
         }
 
         void initTemplate()
@@ -98,20 +102,19 @@ namespace TagGenerator
                 using (System.Xml.XmlTextReader reader = new System.Xml.XmlTextReader(TemplateFile))
                 {
                     Jig = (JigTemplate)(serializer.Deserialize(reader));
-                    var size = tabPageEdit.Size;
+                    var size = tabPage_input.Size;
                     float Xscaling = size.Width / Jig.Perimeter.Width;
                     float Yscaling = size.Height / Jig.Perimeter.Height;
 
                     foreach (var item in Jig.Tag)
                     {
-                        //flowLayoutPanel_Text.Controls.Add(new TextBox());
                         var Text = new TextBox();
                         Text.Location = new Point(Convert.ToInt16((item.Location.X * Xscaling)),
                                                   Convert.ToInt16(size.Height - (item.Location.Y * Yscaling)));
                         Text.Size = new Size(Convert.ToInt16(item.Size.Width * Xscaling),
                                              Convert.ToInt16(item.Size.Height * Yscaling));
                         Text.Tag = item;
-                        tabPageEdit.Controls.Add(Text);
+                        tabPage_input.Controls.Add(Text);
                     }
                 }
             }
@@ -126,7 +129,7 @@ namespace TagGenerator
         void loadFonts()
         {
             string[] FontFiles = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory + @"cxf-fonts\", "*.cxf");
-            
+
             foreach (var item in FontFiles)
             {
                 comboFonts.Add(Path.GetFileNameWithoutExtension(item), item);
@@ -134,7 +137,8 @@ namespace TagGenerator
             }
             cmb_Font.Items.AddRange(comboFonts.Keys.ToArray());
 
-            if (comboFonts.TryGetValue(Properties.Settings.Default.FontFileName, out FontFile)){
+            if (comboFonts.TryGetValue(Properties.Settings.Default.FontFileName, out FontFile))
+            {
                 cmb_Font.SelectedItem = Properties.Settings.Default.FontFileName;
             }
             else
@@ -192,8 +196,8 @@ namespace TagGenerator
                         catch
                         {
 
-                        }                       
-                }
+                        }
+                    }
 
                     //new command
                     if (new_cmd.IsMatch(s))
@@ -403,7 +407,7 @@ namespace TagGenerator
             Tags.Clear();
             PointF oldPoint = new PointF(-999990.0F, -999990.0F);
             float tracking = ((float)(Properties.Settings.Default.CharSpacing) / 100);
-    
+
             foreach (TextBox item in controls.OfType<TextBox>())
             {
                 NamePlate plate = new NamePlate();
@@ -415,7 +419,7 @@ namespace TagGenerator
                 //the X distance that the characters take
                 float char_space = 0;
                 //the width of the entire text box.
-                float textWidth =0;
+                float textWidth = 0;
 
                 foreach (char letter in item.Text.ToCharArray())
                 {
@@ -430,7 +434,7 @@ namespace TagGenerator
                     else
                     {
                         char_space += 0.5F;
-                    }                   
+                    }
                 }
 
                 textWidth = tracking * Scale * char_space;
@@ -464,7 +468,7 @@ namespace TagGenerator
                         continue;
                     }
                     float char_X = Scale * cxfFont[letter].get_xmax();
-                    if(char_X == 0)
+                    if (char_X == 0)
                     {
                         char_X = (float)(Scale * 0.25);
                     }
@@ -488,7 +492,7 @@ namespace TagGenerator
                         {
                             if (!first_stroke && points.Length > 1)
                             {
-                                plate.Segments.Add(points);                                
+                                plate.Segments.Add(points);
                             }
                             points = new PointF[2];
                             points[0].X = (Scale * stroke.xstart) + xoffset;
@@ -496,21 +500,21 @@ namespace TagGenerator
                             points[1].X = (Scale * stroke.xend) + xoffset;
                             points[1].Y = (Scale * stroke.yend) + yoffset;
                         }
-                            oldPoint.X = points.Last().X;
-                            oldPoint.Y = points.Last().Y;
-                            first_stroke = false;
-                        }
+                        oldPoint.X = points.Last().X;
+                        oldPoint.Y = points.Last().Y;
+                        first_stroke = false;
+                    }
 
-                        if (onlyTwo)
-                        {
-                            plate.Segments.Add(points);
-                        }                  
-                        xoffset += tracking * char_X;                    
+                    if (onlyTwo)
+                    {
+                        plate.Segments.Add(points);
+                    }
+                    xoffset += tracking * char_X;
                 }
                 Tags.Add(plate);
                 numTag++;
             }
-        }              
+        }
 
         public float calculateDistance(PointF first, PointF second)
         {
@@ -554,7 +558,7 @@ namespace TagGenerator
             Gcode.AppendFormat("S{0} M03", Properties.Settings.Default.SpindleSpeed).AppendLine();
 
             IssueGCommand("a", 0, 0, 0, 0);
-            Gcode.AppendLine(IssueGCommand("G00", 0,0, ClearanceZ, 0));
+            Gcode.AppendLine(IssueGCommand("G00", 0, 0, ClearanceZ, 0));
             foreach (var tag in Tags)
             {
                 //Gcode.AppendFormat(" Tag Number: {0}", tag.numTag).AppendLine();
@@ -562,7 +566,7 @@ namespace TagGenerator
                 bool freshTag = true;
                 foreach (var item in tag.Segments)
                 {
-                    bool newStroke = true;                 
+                    bool newStroke = true;
                     foreach (var point in item)
                     {
                         if (freshTag)
@@ -571,8 +575,9 @@ namespace TagGenerator
                             Gcode.AppendLine(IssueGCommand("G00", point.X, point.Y, RetractZ, 0));
                             Gcode.AppendLine(IssueGCommand("G01", point.X, point.Y, Depth, PlungeFeed));
                             freshTag = false;
-                            newStroke = false;                           
-                        } else if (newStroke)
+                            newStroke = false;
+                        }
+                        else if (newStroke)
                         {
                             Gcode.AppendLine(IssueGCommand("G00", point.X, point.Y, RetractZ, 0));
                             Gcode.AppendLine(IssueGCommand("G01", point.X, point.Y, Depth, PlungeFeed));
@@ -583,7 +588,7 @@ namespace TagGenerator
                             Gcode.AppendLine(IssueGCommand("G01", point.X, point.Y, Depth, CuttingFeed));
                         }
 
-                        
+
                     }
                     Gcode.AppendLine(IssueGCommand("G00", Xold, Yold, RetractZ, 0));
                     //var clear = IssueGCommand("G00", Xold, Yold, RetractZ, 0);
@@ -593,10 +598,10 @@ namespace TagGenerator
                     //}                    
                 }
                 var lift = IssueGCommand("G00", Xold, Yold, ClearanceZ, 0);
-                if(lift != string.Empty)
+                if (lift != string.Empty)
                 {
                     Gcode.AppendLine(lift);
-                }               
+                }
             }
             Gcode.AppendLine("M30");
             Gcode.AppendLine("%");
@@ -608,7 +613,7 @@ namespace TagGenerator
         public float Zold = 0;
         public float Fold = 0;
 
-        public String IssueGCommand(String Command, float X, float Y, float Z , float F )
+        public String IssueGCommand(String Command, float X, float Y, float Z, float F)
         {
             String GcodeLine = string.Empty;
             if (Command != Gold)
@@ -660,33 +665,26 @@ namespace TagGenerator
 
         private void btn_Generate_Click(object sender, EventArgs e)
         {
-            rtxt_Out.Clear();
-            CalculateStrokes(tabPageEdit.Controls);
-            pictureBox1.Invalidate();
+            richTextBox_Gcode.Clear();
+            CalculateStrokes(tabPage_input.Controls);
+            pictureBox_Preview.Invalidate();
             CreateGcode();
-            rtxt_Out.Text = Gcode.ToString();
+            richTextBox_Gcode.Text = Gcode.ToString();
         }
 
-        private void pictureBox1_Paint(object sender, PaintEventArgs g)
+        private void pictureBox_Preview_Paint(object sender, PaintEventArgs g)
         {
             g.Graphics.Clear(Color.White);
             if (Jig != null)
             {
-                Pen thick = new Pen(Color.Black, 1.5F);               
-                float Xscale = pictureBox1.Width / Jig.Perimeter.Width;
-                float Yscale = pictureBox1.Height / Jig.Perimeter.Height;
+                Pen thick = new Pen(Color.Black, 1.5F);
+                float Xscale = pictureBox_Preview.Width / Jig.Perimeter.Width;
+                float Yscale = pictureBox_Preview.Height / Jig.Perimeter.Height;
                 Xscale = Math.Min(Xscale, Yscale);
                 Yscale = Xscale;
-#if truetype
-                var temppath = Tags.First().path;
-                var mat = new Matrix();
-                mat.Scale(Xscale, Yscale);
 
-                temppath.Transform(mat);
-                g.Graphics.DrawPath(thick, temppath);
-#endif
                 g.Graphics.ScaleTransform(1F, -1F);
-                g.Graphics.TranslateTransform(0F, ((float)(0.25 * Yscale* Jig.Perimeter.Height)) -pictureBox1.Height);
+                g.Graphics.TranslateTransform(0F, ((float)(0.25 * Yscale * Jig.Perimeter.Height)) - pictureBox_Preview.Height);
 
                 Rectangle Out = new Rectangle(0, 0, (int)(Xscale * Jig.Perimeter.Width), (int)(Yscale * Jig.Perimeter.Height));
                 g.Graphics.DrawRectangle(Pens.Blue, Out);
@@ -718,66 +716,17 @@ namespace TagGenerator
                     thick.Dispose();
                 }
             }
-            g.Dispose();                     
+            g.Dispose();
         }
 
-        private void txt_CharSpacing_TextChanged(object sender, EventArgs e)
+        private void txt_Parameter_TextChanged(object sender, KeyEventArgs e)
         {
-            if(txt_CharSpacing.Text != string.Empty)
+            if (((TextBox)sender).Text != string.Empty)
             {
-                Properties.Settings.Default.CharSpacing = Convert.ToInt16(txt_CharSpacing.Text);
-                //Properties.Settings.Default.Save();
+                string ParameterName = ((TextBox)sender).Name;
+
             }
         }
 
-        private void txt_Parameter_TextChanged(object sender, EventArgs e)
-        {
-            if(((TextBox)sender).Text != string.Empty)
-            {
-                string ParameterName = ((TextBox)sender).Name;
-                switch (ParameterName)
-                {
-                    case "txt_CutRate":
-                        Properties.Settings.Default.CuttingFeedRate = Convert.ToSingle(txt_CutRate.Text);
-                        break;
-                    case "txt_Plunge":
-                        Properties.Settings.Default.PlungeFeedRate = Convert.ToSingle(txt_Plunge.Text);
-                        break;
-                    case "txt_Retract":
-                        Properties.Settings.Default.RetractHeight = Convert.ToSingle(txt_Retract.Text);
-                        break;
-                    case "txt_Diameter":
-                        Properties.Settings.Default.EngraverDiameter = Convert.ToSingle(txt_Diameter.Text);
-                        break;
-                    case "txt_ClearanceHeight":
-                        Properties.Settings.Default.ClearanceHeight = Convert.ToSingle(txt_ClearanceHeight.Text);
-                        break;
-
-                    case "txt_EngravingDepth":
-                        Properties.Settings.Default.EngravingDepth = Convert.ToSingle(txt_EngravingDepth.Text);
-                        break;
-                    case "txt_CharSpacing":
-                        Properties.Settings.Default.CharSpacing = Convert.ToInt16(txt_CharSpacing.Text);
-                        break;
-                    default:
-                        break;
-                }
-            }          
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            Properties.Settings.Default.Save();
-        }
-
-        private void cmb_Font_SelectionChangeCommitted(object sender, EventArgs e)
-        {
-            comboFonts.TryGetValue((string)cmb_Font.SelectedItem, out FontFile);
-            cxfFont = parse(FontFile);
-            normalizeFont(ref cxfFont);
-            Properties.Settings.Default.FontFileName = FontFile;
-        }
-
-
-}
+    }
 }

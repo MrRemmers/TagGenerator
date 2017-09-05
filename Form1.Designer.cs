@@ -151,7 +151,7 @@
             // 
             // txt_CharSpacing
             // 
-            this.txt_CharSpacing.Location = new System.Drawing.Point(107, 40);
+            this.txt_CharSpacing.Location = new System.Drawing.Point(107, 45);
             this.txt_CharSpacing.Name = "txt_CharSpacing";
             this.txt_CharSpacing.Size = new System.Drawing.Size(100, 20);
             this.txt_CharSpacing.TabIndex = 5;
@@ -160,7 +160,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 43);
+            this.label1.Location = new System.Drawing.Point(6, 48);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(95, 13);
             this.label1.TabIndex = 6;
@@ -169,7 +169,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(213, 43);
+            this.label2.Location = new System.Drawing.Point(213, 48);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(15, 13);
             this.label2.TabIndex = 7;
