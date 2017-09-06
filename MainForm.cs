@@ -421,7 +421,7 @@ namespace TagGenerator
                 RectangleF TagLoc = (RectangleF)item.Tag;
 
                 //Scale starts out with text as large as possible
-                float Scale = (TagLoc.Height - (Properties.Settings.Default.EngraverDiameter));
+                float Scale = (TagLoc.Height - (float)(1 * Properties.Settings.Default.EngraverDiameter));
                 //the X distance that the characters take
                 float char_space = 0;
                 //the width of the entire text box.
@@ -445,9 +445,9 @@ namespace TagGenerator
 
                 textWidth = tracking * Scale * char_space;
 
-                if (textWidth > (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2)))
+                if (textWidth > (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter)))
                 {
-                    Scale = (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter / 2)) / (tracking * char_space);
+                    Scale = (TagLoc.Width - (Properties.Settings.Default.EngraverDiameter)) / (tracking * char_space);
                     textWidth = tracking * Scale * char_space;
                 }
 
@@ -461,7 +461,7 @@ namespace TagGenerator
                 //justified along the bottom...
                 //float yoffset = TagLoc.Y + (Properties.Settings.Default.EngraverDiameter / 2);
                 //Centered?
-                float yoffset = TagLoc.Y;
+                float yoffset = TagLoc.Y;// - (Properties.Settings.Default.EngraverDiameter/2);
                 yoffset += ((TagLoc.Height - Scale) / 2);
 
                 PointF[] points = new PointF[0];
@@ -564,8 +564,8 @@ namespace TagGenerator
             //set spindle speed and rotate Clockwise.
             Gcode.AppendFormat("S{0} M03", Properties.Settings.Default.SpindleSpeed).AppendLine();
 
-            IssueGCommand("a", 0, 0, 0, 0);
-            Gcode.AppendLine(IssueGCommand("G00", 0, 0, ClearanceZ, 0));
+            IssueGCommand(ref Gcode, "clear", 0, 0, 0, 0);
+            IssueGCommand(ref Gcode, "G00", 0, 0, ClearanceZ, 0);
             foreach (var tag in Tags)
             {
                 //Gcode.AppendFormat(" Tag Number: {0}", tag.numTag).AppendLine();
@@ -578,37 +578,30 @@ namespace TagGenerator
                     {
                         if (freshTag)
                         {
-                            Gcode.AppendLine(IssueGCommand("G00", point.X, point.Y, ClearanceZ, 0));
-                            Gcode.AppendLine(IssueGCommand("G00", point.X, point.Y, RetractZ, 0));
-                            Gcode.AppendLine(IssueGCommand("G01", point.X, point.Y, Depth, PlungeFeed));
+                            IssueGCommand(ref Gcode, "G00", point.X, point.Y, ClearanceZ, 0);
+                            IssueGCommand(ref Gcode,"G00", point.X, point.Y, RetractZ, 0);
+                            IssueGCommand(ref Gcode, "G01", point.X, point.Y, Depth, PlungeFeed);
                             freshTag = false;
                             newStroke = false;
                         }
                         else if (newStroke)
                         {
-                            Gcode.AppendLine(IssueGCommand("G00", point.X, point.Y, RetractZ, 0));
-                            Gcode.AppendLine(IssueGCommand("G01", point.X, point.Y, Depth, PlungeFeed));
+                            IssueGCommand(ref Gcode, "G00", point.X, point.Y, RetractZ, 0);
+                            IssueGCommand(ref Gcode, "G01", point.X, point.Y, Depth, PlungeFeed);
                             newStroke = false;
                         }
                         else
                         {
-                            Gcode.AppendLine(IssueGCommand("G01", point.X, point.Y, Depth, CuttingFeed));
+                           IssueGCommand(ref Gcode, "G01", point.X, point.Y, Depth, CuttingFeed);
                         }
-
-
                     }
-                    Gcode.AppendLine(IssueGCommand("G00", Xold, Yold, RetractZ, 0));
-                    //var clear = IssueGCommand("G00", Xold, Yold, RetractZ, 0);
-                    //if(clear != string.Empty)
-                    //{
-                    //    Gcode.AppendLine(clear);
-                    //}                    
+                    if (item == tag.Segments.Last())
+                    {
+                        IssueGCommand(ref Gcode, "G00", Xold, Yold, RetractZ, 0);  
+                    }
+                           
                 }
-                var lift = IssueGCommand("G00", Xold, Yold, ClearanceZ, 0);
-                if (lift != string.Empty)
-                {
-                    Gcode.AppendLine(lift);
-                }
+                IssueGCommand(ref Gcode, "G00", Xold, Yold, ClearanceZ, 0);
             }
             Gcode.AppendLine("M30");
             Gcode.AppendLine("%");
@@ -620,7 +613,7 @@ namespace TagGenerator
         public float Zold = 0;
         public float Fold = 0;
 
-        public String IssueGCommand(String Command, float X, float Y, float Z, float F)
+        public void IssueGCommand(ref StringBuilder Builder, String Command, float X, float Y, float Z, float F)
         {
             String GcodeLine = string.Empty;
             if (Command != Gold)
@@ -667,7 +660,15 @@ namespace TagGenerator
             Yold = Y;
             Zold = Z;
             Fold = F;
-            return GcodeLine;
+            if (Command == "clear")
+            {
+                return;
+            }
+
+            if (GcodeLine != string.Empty)
+            {
+                Builder.AppendLine(GcodeLine);
+            }
         }
 
         private void btn_Generate_Click(object sender, EventArgs e)

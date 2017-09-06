@@ -89,8 +89,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(906, 487);
-            this.splitContainer1.SplitterDistance = 250;
+            this.splitContainer1.Size = new System.Drawing.Size(934, 541);
+            this.splitContainer1.SplitterDistance = 257;
             this.splitContainer1.TabIndex = 0;
             // 
             // tab_Parameters
@@ -102,7 +102,7 @@
             this.tab_Parameters.Location = new System.Drawing.Point(0, 0);
             this.tab_Parameters.Name = "tab_Parameters";
             this.tab_Parameters.SelectedIndex = 0;
-            this.tab_Parameters.Size = new System.Drawing.Size(250, 487);
+            this.tab_Parameters.Size = new System.Drawing.Size(257, 541);
             this.tab_Parameters.TabIndex = 0;
             // 
             // tabPage1
@@ -111,7 +111,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(242, 461);
+            this.tabPage1.Size = new System.Drawing.Size(249, 515);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Text";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -125,7 +125,7 @@
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(236, 455);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(243, 509);
             this.flowLayoutPanel1.TabIndex = 2;
             // 
             // panel1
@@ -171,7 +171,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(242, 461);
+            this.tabPage2.Size = new System.Drawing.Size(249, 515);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Cutting";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -187,7 +187,7 @@
             this.flowLayoutPanel_Cutting.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel_Cutting.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel_Cutting.Name = "flowLayoutPanel_Cutting";
-            this.flowLayoutPanel_Cutting.Size = new System.Drawing.Size(236, 455);
+            this.flowLayoutPanel_Cutting.Size = new System.Drawing.Size(243, 509);
             this.flowLayoutPanel_Cutting.TabIndex = 0;
             // 
             // tabPage3
@@ -195,7 +195,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(242, 461);
+            this.tabPage3.Size = new System.Drawing.Size(249, 515);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Com.";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -215,14 +215,14 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer2.Size = new System.Drawing.Size(652, 487);
-            this.splitContainer2.SplitterDistance = 113;
+            this.splitContainer2.Size = new System.Drawing.Size(673, 541);
+            this.splitContainer2.SplitterDistance = 111;
             this.splitContainer2.TabIndex = 0;
             // 
             // btn_Transmit
             // 
             this.btn_Transmit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_Transmit.Location = new System.Drawing.Point(553, 7);
+            this.btn_Transmit.Location = new System.Drawing.Point(574, 7);
             this.btn_Transmit.Name = "btn_Transmit";
             this.btn_Transmit.Size = new System.Drawing.Size(96, 61);
             this.btn_Transmit.TabIndex = 1;
@@ -249,16 +249,17 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Multiline = true;
             this.tabControl1.Name = "tabControl1";
+            this.tabControl1.Padding = new System.Drawing.Point(10, 10);
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(652, 370);
+            this.tabControl1.Size = new System.Drawing.Size(673, 426);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage_input
             // 
-            this.tabPage_input.Location = new System.Drawing.Point(23, 4);
+            this.tabPage_input.Location = new System.Drawing.Point(37, 4);
             this.tabPage_input.Name = "tabPage_input";
             this.tabPage_input.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_input.Size = new System.Drawing.Size(625, 362);
+            this.tabPage_input.Size = new System.Drawing.Size(632, 418);
             this.tabPage_input.TabIndex = 0;
             this.tabPage_input.Text = "Text";
             this.tabPage_input.UseVisualStyleBackColor = true;
@@ -266,10 +267,10 @@
             // tabPage_preview
             // 
             this.tabPage_preview.Controls.Add(this.pictureBox_Preview);
-            this.tabPage_preview.Location = new System.Drawing.Point(23, 4);
+            this.tabPage_preview.Location = new System.Drawing.Point(37, 4);
             this.tabPage_preview.Name = "tabPage_preview";
             this.tabPage_preview.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_preview.Size = new System.Drawing.Size(625, 362);
+            this.tabPage_preview.Size = new System.Drawing.Size(632, 418);
             this.tabPage_preview.TabIndex = 1;
             this.tabPage_preview.Text = "Preview";
             this.tabPage_preview.UseVisualStyleBackColor = true;
@@ -279,7 +280,7 @@
             this.pictureBox_Preview.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_Preview.Location = new System.Drawing.Point(3, 3);
             this.pictureBox_Preview.Name = "pictureBox_Preview";
-            this.pictureBox_Preview.Size = new System.Drawing.Size(619, 356);
+            this.pictureBox_Preview.Size = new System.Drawing.Size(626, 412);
             this.pictureBox_Preview.TabIndex = 0;
             this.pictureBox_Preview.TabStop = false;
             this.pictureBox_Preview.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox_Preview_Paint);
@@ -287,10 +288,10 @@
             // tabPage_Gcode
             // 
             this.tabPage_Gcode.Controls.Add(this.richTextBox_Gcode);
-            this.tabPage_Gcode.Location = new System.Drawing.Point(23, 4);
+            this.tabPage_Gcode.Location = new System.Drawing.Point(37, 4);
             this.tabPage_Gcode.Name = "tabPage_Gcode";
             this.tabPage_Gcode.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_Gcode.Size = new System.Drawing.Size(625, 362);
+            this.tabPage_Gcode.Size = new System.Drawing.Size(632, 418);
             this.tabPage_Gcode.TabIndex = 2;
             this.tabPage_Gcode.Text = "Gcode";
             this.tabPage_Gcode.UseVisualStyleBackColor = true;
@@ -300,7 +301,7 @@
             this.richTextBox_Gcode.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBox_Gcode.Location = new System.Drawing.Point(3, 3);
             this.richTextBox_Gcode.Name = "richTextBox_Gcode";
-            this.richTextBox_Gcode.Size = new System.Drawing.Size(619, 356);
+            this.richTextBox_Gcode.Size = new System.Drawing.Size(626, 412);
             this.richTextBox_Gcode.TabIndex = 0;
             this.richTextBox_Gcode.Text = "";
             // 
@@ -379,7 +380,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(906, 487);
+            this.ClientSize = new System.Drawing.Size(934, 541);
             this.Controls.Add(this.splitContainer1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";

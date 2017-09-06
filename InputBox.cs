@@ -59,16 +59,29 @@ namespace TagGenerator
             {
                 if(txt_Input.Text != string.Empty)
                 {
+                    txt_Input.BackColor = System.Drawing.SystemColors.Window;
                     var type = Properties.Settings.Default[(string)Tag].GetType();
-                    if (type == typeof(float))
+                    try
                     {
-                        Properties.Settings.Default[Tag.ToString()] = Convert.ToSingle(txt_Input.Text);
+                        if (type == typeof(float))
+                        {
+                            Properties.Settings.Default[Tag.ToString()] = Convert.ToSingle(txt_Input.Text);
+                        }
+                        else if (type == typeof(int))
+                        {
+                            //Properties.Settings.Default[(string)Tag] = Convert.ToInt16(txt_Input.Text);
+                            Properties.Settings.Default[Tag.ToString()] = Convert.ToInt32(txt_Input.Text);
+                        }
+                        else
+                        {
+                            
+                        }
                     }
-                    if (type == typeof(int))
+                    catch (Exception)
                     {
-                        //Properties.Settings.Default[(string)Tag] = Convert.ToInt16(txt_Input.Text);
-                        Properties.Settings.Default[Tag.ToString()] = Convert.ToInt32(txt_Input.Text);
+                        txt_Input.BackColor = Color.Red;
                     }
+                    
                 }
                
             }
