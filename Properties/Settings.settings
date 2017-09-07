@@ -32,5 +32,23 @@
     <Setting Name="EngraverDiameter" Type="System.Single" Scope="User">
       <Value Profile="(Default)">0.2</Value>
     </Setting>
+    <Setting Name="COMport" Type="System.String" Scope="User">
+      <Value Profile="(Default)">COM4</Value>
+    </Setting>
+    <Setting Name="Baudrate" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4800</Value>
+    </Setting>
+    <Setting Name="Databit" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">7</Value>
+    </Setting>
+    <Setting Name="Parity" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Even</Value>
+    </Setting>
+    <Setting Name="Stopbits" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="FlowControl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">None</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -142,5 +142,77 @@ namespace TagGenerator.Properties {
                 this["EngraverDiameter"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("COM4")]
+        public string COMport {
+            get {
+                return ((string)(this["COMport"]));
+            }
+            set {
+                this["COMport"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4800")]
+        public int Baudrate {
+            get {
+                return ((int)(this["Baudrate"]));
+            }
+            set {
+                this["Baudrate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("7")]
+        public int Databit {
+            get {
+                return ((int)(this["Databit"]));
+            }
+            set {
+                this["Databit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Even")]
+        public string Parity {
+            get {
+                return ((string)(this["Parity"]));
+            }
+            set {
+                this["Parity"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public string Stopbits {
+            get {
+                return ((string)(this["Stopbits"]));
+            }
+            set {
+                this["Stopbits"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("None")]
+        public string FlowControl {
+            get {
+                return ((string)(this["FlowControl"]));
+            }
+            set {
+                this["FlowControl"] = value;
+            }
+        }
     }
 }

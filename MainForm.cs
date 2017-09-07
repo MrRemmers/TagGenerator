@@ -8,6 +8,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using System.Drawing.Drawing2D;
+using System.IO.Ports;
 
 namespace TagGenerator
 {
@@ -28,6 +29,8 @@ namespace TagGenerator
 
         }
         public List<NamePlate> Tags = new List<NamePlate>();
+
+        public SerialPort SerialPort;
 
         #endregion
 
@@ -152,6 +155,46 @@ namespace TagGenerator
 
             }
 
+        }
+
+        void initSerialPort()
+        {
+            string[] AvailableSerialPorts = System.IO.Ports.SerialPort.GetPortNames();
+            comboBox_SerialPorts.Items.AddRange(AvailableSerialPorts);
+            string PortName = Properties.Settings.Default.COMport;
+
+            
+
+            if (PortName != string.Empty && AvailableSerialPorts.Contains(PortName))
+            {
+                try
+                {
+                    SerialPort.PortName = PortName;
+                    comboBox_SerialPorts.SelectedItem = PortName;
+
+                    SerialPort.BaudRate = Properties.Settings.Default.Baudrate;
+                    comboBox_BaudRate.SelectedItem = SerialPort.BaudRate;
+
+                    SerialPort.DataBits = Properties.Settings.Default.Databit;
+                    comboBox_DataBit.SelectedItem = SerialPort.DataBits;
+
+                    SerialPort.Parity = (Parity)System.Enum.Parse(typeof(Parity), Properties.Settings.Default.Parity);
+                    comboBox_Parity.SelectedText = Properties.Settings.Default.Parity;
+
+                    SerialPort.StopBits = (StopBits)System.Enum.Parse(typeof(StopBits), Properties.Settings.Default.Stopbits);
+                    comboBox_StopBits.SelectedText = Properties.Settings.Default.Stopbits;
+
+                    SerialPort.Handshake = (Handshake)System.Enum.Parse(typeof(Handshake), Properties.Settings.Default.FlowControl);
+                    comboBox_FlowControl.SelectedText = Properties.Settings.Default.FlowControl;
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+
+        
         }
 
         /// <summary>
@@ -571,6 +614,7 @@ namespace TagGenerator
                 //Gcode.AppendFormat(" Tag Number: {0}", tag.numTag).AppendLine();
                 //Gcode.AppendLine(IssueGCommand("G00", 0, 0, ClearanceZ, 0));
                 bool freshTag = true;
+                
                 foreach (var item in tag.Segments)
                 {
                     bool newStroke = true;
@@ -595,11 +639,7 @@ namespace TagGenerator
                            IssueGCommand(ref Gcode, "G01", point.X, point.Y, Depth, CuttingFeed);
                         }
                     }
-                    if (item == tag.Segments.Last())
-                    {
-                        IssueGCommand(ref Gcode, "G00", Xold, Yold, RetractZ, 0);  
-                    }
-                           
+                        IssueGCommand(ref Gcode, "G00", Xold, Yold, RetractZ, 0);                
                 }
                 IssueGCommand(ref Gcode, "G00", Xold, Yold, ClearanceZ, 0);
             }
@@ -748,9 +788,29 @@ namespace TagGenerator
                 {
                     item.Text = string.Empty;
                 }
+                CalculateStrokes(tabPage_input.Controls);
                 pictureBox_Preview.Invalidate();
                 richTextBox_Gcode.Clear();
             }
+        }
+
+        private void btn_Transmit_Click(object sender, EventArgs e)
+        {
+            if (SerialPort.IsOpen)
+            {
+                SerialPort.Close();
+                return;
+            }
+            backgroundWorker1.RunWorkerAsync();
+           
+        }
+
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            SerialPort.Open();
+            
+            SerialPort.Write(Gcode.ToString());
+
         }
     }
 }
